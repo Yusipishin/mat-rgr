@@ -10,9 +10,15 @@ td, th {
 }
 
 .table-input {
-	max-width: 30px;
+	max-width: 40px;
 }
 
 .button1 {
 	margin-right: 15px;
+}
+
+.radio-wrap {
+	display: flex;
+	align-items: center;
+	gap: 20px;
 }

@@ -3,10 +3,11 @@ let matr = [];
 let flag;
 let s;
 
+const radioMax = document.getElementById('Radio1')
+let findMax = radioMax.checked;
+
 const table = document.getElementById("table");
 
-//Эта функция вызывается при нажатии на кнопку и заполняет
-// таблицу данными в соответствии с введенными значениями пользователем.
 const Button1Click = () => {
     a = parseInt(document.getElementById("Edit1").value);
     b = parseInt(document.getElementById("Edit2").value);
@@ -37,28 +38,28 @@ const Button1Click = () => {
 const btn1 = document.getElementById('Button1')
 btn1.addEventListener('click', Button1Click)
 
-// Эта функция находит включаемую в базис переменную.
-// Она проходит по строке Z и находит минимальный элемент
 const vklper = (mm, bb) => {
     let min = 0;
     let k = 0;
-    for (let i = 0; i < bb - 1; i++) {
-        if (parseFloat(mm[0][i]) < min) {
-            min = parseFloat(mm[0][i]);
-            k = i;
+    if (findMax) {
+        for (let i = 0; i < bb - 1; i++) {
+            if (parseFloat(mm[0][i]) < min) {
+                min = parseFloat(mm[0][i]);
+                k = i;
+            }
+        }
+    } else {
+        for (let i = 0; i < bb - 1; i++) {
+            if (parseFloat(mm[0][i]) > min) {
+                min = parseFloat(mm[0][i]);
+                k = i;
+            }
         }
     }
+
     return k;
 }
 
-//Данная функция находит переменную, которую нужно исключить из базиса.
-// Она ищет минимальное отношение между свободным членом и коэффициентом
-// переменной в столбце, указанном переменной, которую нужно включить в базис.
-
-// mm = матрица
-// aa = table.RowCount;
-// bb = table.ColCount; отчёт с 1!!
-// kk = включаемая (index Col) относительно ТАБЛИЦЫ
 const isklper = (mm, aa, bb, kk) => {
     let min = 10E5;
     let l = 0;
@@ -72,13 +73,6 @@ const isklper = (mm, aa, bb, kk) => {
     return l;
 }
 
-//Эта функция пересчитывает таблицу симплекс-метода.
-// Она выполняет пересчет значений в таблице на основе
-// включенной и исключенной переменных, чтобы получить новую симплекс-таблицу.
-
-// aa = table.RowCount;
-// bb = table.ColCount; отчёт с 1!!
-// здесь vkll и iskll относительно матрица
 const newresh = (aa, bb, vkll, iskll, m) => {
     console.log(`Ведущий элемент в матрице col:[${vkll}] row:[${iskll}]`)
     let m1 = JSON.parse(JSON.stringify(m))
@@ -103,13 +97,8 @@ const newresh = (aa, bb, vkll, iskll, m) => {
     return m1
 }
 
-// При нажатии на кнопку выполняется данная функция.
-// Она извлекает данные из таблицы и проверяет их на оптимальность.
-// Если данные не оптимальны, то выполняется итерационный процесс симплекс-метода,
-// включая шаги по включению и исключению переменных, а также пересчет таблицы,
-// пока не будет достигнуто оптимальное решение. После завершения процесса выводится
-// сообщение или обновляется таблица с окончательными результатами.
 const Button2Click = () => {
+    findMax = radioMax.checked;
     a = table.RowCount;
     b = table.ColCount;
     matr = new Array(a - 1).fill(null).map(() => new Array(b - 1).fill(null));
@@ -121,18 +110,26 @@ const Button2Click = () => {
     }
 
     flag = true;
-    for (let i = 0; i < table.ColCount - 1; i++) {
-        if (parseFloat(matr[0][i]) < 0) {
-            flag = false;
+
+    if (findMax) {
+        for (let i = 0; i < table.ColCount - 1; i++) {
+            if (parseFloat(matr[0][i]) < 0) {
+                flag = false;
+            }
+        }
+    } else {
+        for (let i = 0; i < table.ColCount - 1; i++) {
+            if (parseFloat(matr[0][i]) > 0) {
+                flag = false;
+            }
         }
     }
+
     if (flag) {
         alert('Решение оптимально или данные введены неверно!');
     }
-    let k = 0;
 
     while (!flag) {
-        k += 1
         const vkl = vklper(matr, b) + 1; // включаемая (index Col) относительно ТАБЛИЦЫ
         const iskl = isklper(matr, a, b, vkl) + 2; // исключаемая (index Row) относительно ТАБЛИЦЫ
         s = table.rows[0].cells[vkl].textContent
@@ -140,19 +137,26 @@ const Button2Click = () => {
         matr = newresh(a, b, vkl - 1, iskl - 1, matr);
         console.log(matr)
         flag = true;
-        for (let i = 0; i < table.ColCount - 1; i++) {
-            if (parseFloat(matr[0][i]) < 0) {
-                flag = false;
+        if (findMax) {
+            for (let i = 0; i < table.ColCount - 1; i++) {
+                if (parseFloat(matr[0][i]) < 0) {
+                    flag = false;
+                }
+            }
+        } else {
+            for (let i = 0; i < table.ColCount - 1; i++) {
+                if (parseFloat(matr[0][i]) > 0) {
+                    flag = false;
+                }
             }
         }
         if (flag) {
             for (let i = 1; i < table.RowCount; i++) {
                 for (let j = 1; j < table.ColCount; j++) {
-                    table.rows[i].cells[j].querySelector('.table-input').value = Math.round(matr[i - 1][j - 1]);
+                    table.rows[i].cells[j].querySelector('.table-input').value = Math.floor(matr[i - 1][j - 1] * 100) / 100;
                 }
             }
         }
-        if (k > 4) break
     }
 }
 
