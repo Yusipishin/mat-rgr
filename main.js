@@ -39,12 +39,12 @@ btn1.addEventListener('click', Button1Click)
 
 // Эта функция находит включаемую в базис переменную.
 // Она проходит по строке Z и находит минимальный элемент
-const vklper = (m, a, b) => {
+const vklper = (mm, bb) => {
     let min = 0;
     let k = 0;
-    for (let i = 0; i < b - 1; i++) {
-        if (parseFloat(m[0][i]) < min) {
-            min = parseFloat(m[0][i]);
+    for (let i = 0; i < bb - 1; i++) {
+        if (parseFloat(mm[0][i]) < min) {
+            min = parseFloat(mm[0][i]);
             k = i;
         }
     }
@@ -54,14 +54,19 @@ const vklper = (m, a, b) => {
 //Данная функция находит переменную, которую нужно исключить из базиса.
 // Она ищет минимальное отношение между свободным членом и коэффициентом
 // переменной в столбце, указанном переменной, которую нужно включить в базис.
-const isklper = (m, a, b, k) => {
+
+// mm = матрица
+// aa = table.RowCount;
+// bb = table.ColCount; отчёт с 1!!
+// kk = включаемая (index Col) относительно ТАБЛИЦЫ
+const isklper = (mm, aa, bb, kk) => {
     let min = 10E5;
     let l = 0;
-    for (let i = 0; i < a - 1; i++) {
-        const del = parseFloat(m[i][b - 1]) / parseFloat(m[i][k])
-        if (parseFloat(m[i][k]) > 0 && del < min) {
+    for (let i = 1; i < aa - 1; i++) {
+        const del = parseFloat(mm[i][bb - 2]) / parseFloat(mm[i][kk-1])
+        if (parseFloat(mm[i][kk-1]) !== 0 && del < min && del > 0) {
             min = del;
-            l = i;
+            l = i - 1;
         }
     }
     return l;
@@ -70,34 +75,33 @@ const isklper = (m, a, b, k) => {
 //Эта функция пересчитывает таблицу симплекс-метода.
 // Она выполняет пересчет значений в таблице на основе
 // включенной и исключенной переменных, чтобы получить новую симплекс-таблицу.
-const newresh = (a, b, vkl, iskl, m) => {
+
+// aa = table.RowCount;
+// bb = table.ColCount; отчёт с 1!!
+// здесь vkll и iskll относительно матрица
+const newresh = (aa, bb, vkll, iskll, m) => {
+    console.log(`Ведущий элемент в матрице col:[${vkll}] row:[${iskll}]`)
     let m1 = JSON.parse(JSON.stringify(m))
-    let vedel = parseFloat(m[iskl][vkl]);
-    for (let j = 0; j < b - 1; j++) {
-        m1[iskl][j] = (parseFloat(m[iskl][j]) / vedel).toString();
+    let vedel = parseFloat(m[iskll][vkll]);
+    console.log(`Ведущий элемент: ` + vedel)
+    for (let j = 0; j < bb - 1; j++) {
+        m1[iskll][j] = (parseFloat(m[iskll][j]) / vedel).toString();
     }
-    for (let i = 0; i < a - 1; i++) {
-        let vedelstr = parseFloat(m[i][vkl]);
-        if (i !== iskl) {
-            for (let j = 0; j < b - 1; j++) {
-                let c = parseFloat(m[i][j]) - (vedelstr * parseFloat(m1[iskl][j]));
-                if (c > -1e-10 && c < 1e-10) {
-                    c = 0;
-                }
+    for (let i = 0; i < aa - 1; i++) {
+        let vedelstr = parseFloat(m[i][vkll]);
+        if (i !== iskll) {
+            for (let j = 0; j < bb - 1; j++) {
+                let c = parseFloat(m[i][j]) - (vedelstr * parseFloat(m1[iskll][j]));
+                // if (c > -1e-10 && c < 1e-10) {
+                //     c = 0;
+                // }
                 m1[i][j] = c.toString();
             }
         }
     }
-    for (let i = 0; i < a - 1; i++) {
-        for (let j = 0; j < b - 1; j++) {
-            m[i][j] = m1[i][j];
-        }
-    }
 
-    console.log(m)
+    return m1
 }
-
-
 
 // При нажатии на кнопку выполняется данная функция.
 // Она извлекает данные из таблицы и проверяет их на оптимальность.
@@ -125,12 +129,16 @@ const Button2Click = () => {
     if (flag) {
         alert('Решение оптимально или данные введены неверно!');
     }
+    let k = 0;
+
     while (!flag) {
-        const vkl = vklper(matr, a, b) + 1; // включаемая (index Col) относительно ТАБЛИЦЫ
+        k += 1
+        const vkl = vklper(matr, b) + 1; // включаемая (index Col) относительно ТАБЛИЦЫ
         const iskl = isklper(matr, a, b, vkl) + 2; // исключаемая (index Row) относительно ТАБЛИЦЫ
         s = table.rows[0].cells[vkl].textContent
         table.rows[iskl].cells[0].textContent = s;
-        newresh(a, b, vkl - 1, iskl - 1, matr);
+        matr = newresh(a, b, vkl - 1, iskl - 1, matr);
+        console.log(matr)
         flag = true;
         for (let i = 0; i < table.ColCount - 1; i++) {
             if (parseFloat(matr[0][i]) < 0) {
@@ -140,10 +148,11 @@ const Button2Click = () => {
         if (flag) {
             for (let i = 1; i < table.RowCount; i++) {
                 for (let j = 1; j < table.ColCount; j++) {
-                    table.rows[i].cells[j].querySelector('.table-input').value = matr[i - 1][j - 1];
+                    table.rows[i].cells[j].querySelector('.table-input').value = Math.round(matr[i - 1][j - 1]);
                 }
             }
         }
+        if (k > 4) break
     }
 }
 
