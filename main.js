@@ -67,7 +67,7 @@ const outVar = (mm, aa, bb, kk) => {
     return l;
 }
 
-const newresh = (aa, bb, vkll, iskll, m) => {
+const newSolution = (aa, bb, vkll, iskll, m) => {
     console.log(`Ведущий элемент в матрице col:[${vkll}] row:[${iskll}]`)
     let m1 = JSON.parse(JSON.stringify(m))
     let vedel = parseFloat(m[iskll][vkll]);
@@ -107,11 +107,11 @@ const solveTask = () => {
     }
 
     while (!optimal) {
-        const vkl = inVar(matr, countConfines) + 1;
-        const iskl = outVar(matr, countVars, countConfines, vkl) + 2;
-        includeVariable = table.rows[0].cells[vkl].textContent
-        table.rows[iskl].cells[0].textContent = includeVariable;
-        matr = newresh(countVars, countConfines, vkl - 1, iskl - 1, matr);
+        const vklVar = inVar(matr, countConfines) + 1;
+        const isklVar = outVar(matr, countVars, countConfines, vklVar) + 2;
+        includeVariable = table.rows[0].cells[vklVar].textContent
+        table.rows[isklVar].cells[0].textContent = includeVariable;
+        matr = newSolution(countVars, countConfines, vklVar - 1, isklVar - 1, matr);
         console.log(matr)
         checkOptimal()
         if (optimal) {
