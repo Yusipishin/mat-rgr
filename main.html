@@ -11,25 +11,25 @@
 <body>
     <h1>Решение Симплекс Методом</h1>
 
-    <label for="Edit1">Введите количество переменных: </label>
-    <input type="text" id="Edit1"><br><br>
+    <label for="countVars">Введите количество переменных: </label>
+    <input type="text" id="countVars"><br><br>
 
-    <label for="Edit2">Введите количество ограничений: </label>
-    <input type="text" id="Edit2"><br><br>
+    <label for="countConfines">Введите количество ограничений: </label>
+    <input type="text" id="countConfines"><br><br>
 
     <div class="radio-wrap">
         <div>
-            <label for="Radio1">MAX: </label>
-            <input checked type="radio" name="radio" id="Radio1"><br><br>
+            <label for="radio-max">MAX: </label>
+            <input checked type="radio" name="radio" id="radio-max"><br><br>
         </div>
         <div>
-            <label for="Radio2">MIN: </label>
-            <input type="radio" name="radio" id="Radio2"><br><br>
+            <label for="radio-min">MIN: </label>
+            <input type="radio" name="radio" id="radio-min"><br><br>
         </div>
     </div>
 
-    <button class="button1" id="Button1">Сформировать таблицу</button>
-    <button id="Button2">Решить</button><br><br>
+    <button class="button1" id="btn-create">Сформировать таблицу</button>
+    <button id="btn-solve">Решить</button><br><br>
 
     <table id="table">
         <!-- Динамическая таблица -->

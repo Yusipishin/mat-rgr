@@ -1,23 +1,17 @@
-let a, b;
-let matr = [];
-let flag;
-let s;
-
-const radioMax = document.getElementById('Radio1')
-let findMax = radioMax.checked;
-
+const radioMax = document.getElementById('radio-max')
 const table = document.getElementById("table");
+let countVars, countConfines, includeVariable, optimal, matr = [], findMax = radioMax.checked;
 
-const Button1Click = () => {
-    a = parseInt(document.getElementById("Edit1").value);
-    b = parseInt(document.getElementById("Edit2").value);
+const createTable = () => {
+    countVars = parseInt(document.getElementById("countVars").value);
+    countConfines = parseInt(document.getElementById("countConfines").value);
 
     while (table.rows.length > 0) {
         table.deleteRow(0);
     }
 
-    table.RowCount = b + 2;
-    table.ColCount = b + a + 2;
+    table.RowCount = countConfines + 2;
+    table.ColCount = countConfines + countVars + 2;
 
     for (let i = 0; i < table.RowCount; i++) {
         let row = table.insertRow();
@@ -35,10 +29,10 @@ const Button1Click = () => {
         }
     }
 }
-const btn1 = document.getElementById('Button1')
-btn1.addEventListener('click', Button1Click)
+const btn1 = document.getElementById('btn-create')
+btn1.addEventListener('click', createTable)
 
-const vklper = (mm, bb) => {
+const inVar = (mm, bb) => {
     let min = 0;
     let k = 0;
     if (findMax) {
@@ -60,7 +54,7 @@ const vklper = (mm, bb) => {
     return k;
 }
 
-const isklper = (mm, aa, bb, kk) => {
+const outVar = (mm, aa, bb, kk) => {
     let min = 10E5;
     let l = 0;
     for (let i = 1; i < aa - 1; i++) {
@@ -86,9 +80,6 @@ const newresh = (aa, bb, vkll, iskll, m) => {
         if (i !== iskll) {
             for (let j = 0; j < bb - 1; j++) {
                 let c = parseFloat(m[i][j]) - (vedelstr * parseFloat(m1[iskll][j]));
-                // if (c > -1e-10 && c < 1e-10) {
-                //     c = 0;
-                // }
                 m1[i][j] = c.toString();
             }
         }
@@ -97,11 +88,11 @@ const newresh = (aa, bb, vkll, iskll, m) => {
     return m1
 }
 
-const Button2Click = () => {
+const solveTask = () => {
     findMax = radioMax.checked;
-    a = table.RowCount;
-    b = table.ColCount;
-    matr = new Array(a - 1).fill(null).map(() => new Array(b - 1).fill(null));
+    countVars = table.RowCount;
+    countConfines = table.ColCount;
+    matr = new Array(countVars - 1).fill(null).map(() => new Array(countConfines - 1).fill(null));
 
     for (let i = 1; i < table.RowCount; i++) {
         for (let j = 1; j < table.ColCount; j++) {
@@ -109,48 +100,21 @@ const Button2Click = () => {
         }
     }
 
-    flag = true;
+    checkOptimal()
 
-    if (findMax) {
-        for (let i = 0; i < table.ColCount - 1; i++) {
-            if (parseFloat(matr[0][i]) < 0) {
-                flag = false;
-            }
-        }
-    } else {
-        for (let i = 0; i < table.ColCount - 1; i++) {
-            if (parseFloat(matr[0][i]) > 0) {
-                flag = false;
-            }
-        }
-    }
-
-    if (flag) {
+    if (optimal) {
         alert('Решение оптимально или данные введены неверно!');
     }
 
-    while (!flag) {
-        const vkl = vklper(matr, b) + 1; // включаемая (index Col) относительно ТАБЛИЦЫ
-        const iskl = isklper(matr, a, b, vkl) + 2; // исключаемая (index Row) относительно ТАБЛИЦЫ
-        s = table.rows[0].cells[vkl].textContent
-        table.rows[iskl].cells[0].textContent = s;
-        matr = newresh(a, b, vkl - 1, iskl - 1, matr);
+    while (!optimal) {
+        const vkl = inVar(matr, countConfines) + 1;
+        const iskl = outVar(matr, countVars, countConfines, vkl) + 2;
+        includeVariable = table.rows[0].cells[vkl].textContent
+        table.rows[iskl].cells[0].textContent = includeVariable;
+        matr = newresh(countVars, countConfines, vkl - 1, iskl - 1, matr);
         console.log(matr)
-        flag = true;
-        if (findMax) {
-            for (let i = 0; i < table.ColCount - 1; i++) {
-                if (parseFloat(matr[0][i]) < 0) {
-                    flag = false;
-                }
-            }
-        } else {
-            for (let i = 0; i < table.ColCount - 1; i++) {
-                if (parseFloat(matr[0][i]) > 0) {
-                    flag = false;
-                }
-            }
-        }
-        if (flag) {
+        checkOptimal()
+        if (optimal) {
             for (let i = 1; i < table.RowCount; i++) {
                 for (let j = 1; j < table.ColCount; j++) {
                     table.rows[i].cells[j].querySelector('.table-input').value = Math.floor(matr[i - 1][j - 1] * 100) / 100;
@@ -160,5 +124,22 @@ const Button2Click = () => {
     }
 }
 
-const btn2 = document.getElementById('Button2')
-btn2.addEventListener('click', Button2Click)
+const btn2 = document.getElementById('btn-solve')
+btn2.addEventListener('click', solveTask)
+
+const checkOptimal = () => {
+    optimal = true;
+    if (findMax) {
+        for (let i = 0; i < table.ColCount - 1; i++) {
+            if (parseFloat(matr[0][i]) < 0) {
+                optimal = false;
+            }
+        }
+    } else {
+        for (let i = 0; i < table.ColCount - 1; i++) {
+            if (parseFloat(matr[0][i]) > 0) {
+                optimal = false;
+            }
+        }
+    }
+}
